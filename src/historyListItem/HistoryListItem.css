@@ -1,0 +1,38 @@
+.translate-item {
+    border-bottom: 1px solid rgba(0,0,0,0.12);
+    /* max-width: 1000px; */
+    width: 100%;
+    margin: 0 auto;
+    padding: 10px;
+    /* border-radius: 2px; */
+}
+.pair-languages {
+    color: #9aa0a6;
+    font-size: 13px;
+    font-family: Roboto, Arial, sans-serif;
+    margin-bottom: 10px;
+}
+.arrow {
+    margin: 0 2px;
+    color: #9aa0a6;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: .3px;
+}
+.arrow:before {
+    content: '\002192';
+}
+.origin-phrase,
+.translated-phrase {
+    font-family: 'Roboto',arial,sans-serif;
+    font-size: 14px;
+    white-space: pre-wrap;
+    line-height: 20px;
+}
+.origin-phrase {
+    color: #000;
+}
+.translated-phrase {
+    color: #5f6368;
+}

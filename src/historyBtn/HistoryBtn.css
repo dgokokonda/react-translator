@@ -1,0 +1,12 @@
+.history-btn {
+    background-image: url(https://ssl.gstatic.com/images/icons/material/system_gm/2x/history_googblue_48dp.png);
+    background-repeat: no-repeat;
+    background-size: 28px;
+    background-position: center;
+    background-color: #eaf0fc;
+    border-color: #eaf0fc;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    margin: 4px 24px;
+}

@@ -1,0 +1,21 @@
+.history-list {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    width: 100%;
+}
+h1 {
+    width: 100%;
+    font-size: 28px;
+    color: #3c4043;
+    font-family: sans-serif;
+    text-align: center;
+    border-bottom: 1px solid rgba(0,0,0,0.12);
+    margin-bottom: 0;
+    padding-bottom: 18px;
+}
+.translate-history {
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 325px;
+}
