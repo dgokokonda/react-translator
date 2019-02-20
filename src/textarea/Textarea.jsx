@@ -8,12 +8,14 @@ export class Textarea extends Component {
             value: ''
         }
     }
-    handler = ({target: {value}}) => {
+    handler = ({target: {value, offsetHeight, scrollHeight}}) => {
+        const resizeVal = offsetHeight < scrollHeight ? scrollHeight - offsetHeight : 0;
         this.setState({
             value: this.props.value,
         });
         this.props.onChange(value);
-
+        // resize textarea field:
+        document.querySelectorAll('textarea').forEach((i) => i.style.minHeight = `${resizeVal + 170}px`);
     };
 
     render() {

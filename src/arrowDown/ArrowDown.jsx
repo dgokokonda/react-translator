@@ -14,7 +14,7 @@ export class ArrowDown extends Component {
             <Fragment>
                 <div 
                     onClick={() => displayList(setLanguage, type)} 
-                    className={`arrowDown ${timePassed[type] ? 'active' : ''}`}
+                    className={`arrowDown ${timePassed ? 'active' : ''} ${type === 'from' ? 'arrowDown--left' : ''}`}
                 />
             </Fragment>
         );

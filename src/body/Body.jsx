@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Router, Route, Switch } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import { debounce } from 'lodash';
 import './Body.css';
@@ -22,257 +22,289 @@ export class Body extends Component {
                 'callback': null,
                 'type': null
             },
-            // translateData: {
-            //     'from': {
-            //         codeLang: 'ru',
-            //         text: '',
-            //         languages: [
-            //             {
-            //                 code: '',
-            //                 name: 'Определить язык'
-            //             }, {
-            //                 code: 'ru',
-            //                 name: 'Русский'
-            //             }, {
-            //                 code: 'en',
-            //                 name: 'Английский'
-            //             }, {
-            //                 code: 'de',
-            //                 name: 'Немецкий'
-            //             }
-            //         ],
-            //         timePassed: false,
-            //     },
-            //     'to': {
-            //         codeLang: 'en',
-            //         text: '',
-            //         languages: [
-            //             {
-            //                 code: 'en',
-            //                 name: 'Английский'
-            //             }, {
-            //                 code: 'ru',
-            //                 name: 'Русский'
-            //             }, {
-            //                 code: 'uk',
-            //                 name: 'Украинский'
-            //             }
-            //         ],
-            //         timePassed: false,
-            //     }
-            // },
-            timePassed: {
-                'from': false,
-                'to': false
+            translateData: {
+                'from': {
+                    codeLang: 'ru',
+                    text: '',
+                    languages: [
+                        {
+                            code: '',
+                            name: 'Определить язык'
+                        }, {
+                            code: 'ru',
+                            name: 'Русский'
+                        }, {
+                            code: 'en',
+                            name: 'Английский'
+                        }, {
+                            code: 'de',
+                            name: 'Немецкий'
+                        }
+                    ],
+                    timePassed: false,
+                },
+                'to': {
+                    codeLang: 'en',
+                    text: '',
+                    languages: [
+                        {
+                            code: 'en',
+                            name: 'Английский'
+                        }, {
+                            code: 'ru',
+                            name: 'Русский'
+                        }, {
+                            code: 'uk',
+                            name: 'Украинский'
+                        }
+                    ],
+                    timePassed: false,
+                }
             },
-            fromCodeLang: '',
-            toCodeLang: '',
-            originText: '',
-            translatedText: '',
             detectedLang: '',
-            languages: {
-                'from': [
-                    {
-                        code: '',
-                        name: 'Определить язык'
-                    }, {
-                        code: 'ru',
-                        name: 'Русский'
-                    }, {
-                        code: 'en',
-                        name: 'Английский'
-                    }, {
-                        code: 'de',
-                        name: 'Немецкий'
-                    }
-                ],
-                'to': [
-                    {
-                        code: 'en',
-                        name: 'Английский'
-                    }, {
-                        code: 'ru',
-                        name: 'Русский'
-                    }, {
-                        code: 'uk',
-                        name: 'Украинский'
-                    }
-                ]
-            },
             translateHistory: [],
             visibleHistory: false,
         }
     }
+
     displayList = (callback, type) => {
         let that = this;
 
         this.setState({
             visible: !this.state.visible,
             callbackData: {
-                'callback' : callback,
+                'callback': callback,
                 'type': type
             },
-            timePassed: {
-                ...this.state.timePassed,
-                [type]: !this.state.timePassed[type]
+            translateData: {
+                ...this.state.translateData,
+                [type]: {
+                    ...this.state.translateData[type],
+                    timePassed: !this.state.translateData[type].timePassed
+                }
             }
         });
 
         setTimeout(function() {
             that.setState({
-                timePassed: {
-                    ...that.state.timePassed,
-                    [type]: !that.state.timePassed[type]
-                }
+                translateData: {
+                    ...that.state.translateData,
+                    [type]: {
+                        ...that.state.translateData[type],
+                        timePassed: !that.state.translateData[type].timePassed
+                    }
+                },
             })
         }, 200);
     }
+
     setLangTitle = (code, name, type, from, to) => {
+        
         switch (type) {
             case 'from':
-                this.setState({
-                    languages: {
-                        'from': [
-                            {...this.state.languages.from[0]
+                const paramF = (this.checkForSameKeys(type, code)) ? {
+                    ...this.state.translateData,
+                    'from': {
+                        ...this.state.translateData.from,
+                        languages: [
+                            {
+                                code: '',
+                                name: 'Определить язык'
+                            },
+                            ...this.state.translateData.from.languages.filter((lang) => lang.code !== '')
+                        ],
+                        codeLang: code
+                    }
+                } : {
+                    ...this.state.translateData,
+                    'from': {
+                        ...this.state.translateData.from,
+                        languages: [
+                            {
+                                code: '',
+                                name: 'Определить язык'
                             }, {
-                                code: code, 
+                                code: code,
                                 name: name
                             },
-                            ...this.state.languages.from.slice(1, this.state.languages.from.length - 1)
+                            ...this.state.translateData.from.languages.filter((lang, item) => lang.code !== code && lang.code !== '' && item < 3)
                         ],
-                        'to': [...this.state.languages.to]
+                        codeLang: code
                     }
+                }
+                this.setState({
+                    translateData: paramF
                 });
                 break;
             case 'to':
-                this.setState({
-                    languages: {
-                        'from': [...this.state.languages.from],
-                        'to': [
+                const paramT = (this.checkForSameKeys(type, code)) ? {
+                    ...this.state.translateData,
+                    'to': {
+                        languages: [
                             {
-                                code: code, 
+                                code: code,
                                 name: name
                             },
-                            ...this.state.languages.to.slice(0, this.state.languages.to.length - 1)
-                        ]
+                            ...this.state.translateData.to.languages.filter((lang, item) => lang.code !== code && item < 3)
+                        ],
+                        codeLang: code
                     }
+                } : {
+                    ...this.state.translateData,
+                    'to': {
+                        languages: [
+                            {
+                                code: code,
+                                name: name
+                            },
+                            ...this.state.translateData.to.languages.slice(0, 2)
+                        ],
+                        codeLang: code
+                    }
+            }
+                this.setState({
+                    translateData: paramT
                 });
                 break;
             case 'detect':
                 this.setState({
-                    languages: {
-                        'from': [
-                            {
-                                code: '', 
-                                name: `${name} (определен автоматически)`
-                            }, 
-                            ...this.state.languages.from.slice(1)
-                        ],
-                        'to': [...this.state.languages.to]
+                    translateData: {
+                        ...this.state.translateData,
+                        'from': {
+                            ...this.state.translateData.from,
+                            languages: [
+                                {
+                                    code: '',
+                                    name: `${name} (определен автоматически)`
+                                },
+                                ...this.state.translateData.from.languages.slice(1)
+                            ]
+                        }
                     }
                 });
                 break;
             case 'switch':
-                const param1 = (this.checkForSameKeys('from', from) === 0) ? 
-                    [
-                        {
-                            code: '',
-                            name: 'Определить язык'
-                        }, {
-                            code: from,
-                            name: this.state.langsList.langs[from]
-                        },
-                        ...this.state.languages.from.filter((lang) => {
-                            if (lang.code === to) {
-                                this.state.languages.from.splice(lang, 1);
+                if (to) {
+                    const param1 = (this.checkForSameKeys('from', from) === 0) ? 
+                        [
+                            {
+                                code: '',
+                                name: 'Определить язык'
+                            }, {
+                                code: from,
+                                name: this.state.langsList.langs[from]
+                            },
+                            ...this.state.translateData.from.languages.filter((lang) => {
+                                if (lang.code === to) {
+                                    this.state.translateData.from.languages.splice(lang, 1);
+                                }
+                            }),
+                            ...this.state.translateData.from.languages.filter(({code}) => (code !== from && code !== '' && code !== to))
+                        ]
+                        : [
+                            {
+                                code: '',
+                                name: 'Определить язык'
+                            },
+                            ...this.state.translateData.from.languages.slice(1)
+                        ];
+                    const param2 = (this.checkForSameKeys('to', to) === 0) ? 
+                        [
+                            {
+                                code: to,
+                                name: this.state.langsList.langs[to]
+                            }, 
+                            ...this.state.translateData.to.languages.filter((lang) => {
+                                if (lang.code === from) {
+                                    this.state.translateData.to.languages.splice(lang, 1);
+                                }
+                            }),
+                            ...this.state.translateData.to.languages.filter(({code}) => (code !== to))
+                        ]
+                        : [
+                            ...this.state.translateData.to.languages,
+                        ];
+                    
+                    this.setState({
+                        translateData: {
+                            'from': {
+                                ...this.state.translateData.from,
+                                codeLang: from,
+                                text: this.state.translateData.to.text || '',
+                                languages: param1
+                            },
+                            'to': {
+                                ...this.state.translateData.to,
+                                codeLang: to,
+                                languages: param2
                             }
-                        }),
-                        ...this.state.languages.from.filter(({code}) => (code !== from && code !== '' && code !== to))
-                    ] 
-                    : [
-                        {
-                            code: '',
-                            name: 'Определить язык'
                         },
-                        ...this.state.languages.from.slice(1)
-                    ];
-                const param2 = (this.checkForSameKeys('to', to) === 0) ? 
-                [
-                    {
-                        code: to,
-                        name: this.state.langsList.langs[to]
-                    },
-                    ...this.state.languages.to.filter((lang) => {
-                        if (lang.code === from) {
-                            this.state.languages.to.splice(lang, 1);
-                        }
-                    }),
-                    ...this.state.languages.to.filter(({code}) => (code !== to))
-                ] : [
-                    ...this.state.languages.to
-                ];
-
-                this.setState({
-                    languages: {
-                        'from': param1,
-                        'to': param2
-                    },
-                    fromCodeLang: from,
-                    toCodeLang: to,
-                    detectedLang: '',
-                    originText: this.state.translatedText ? this.state.translatedText.text[0] : ''
-                });
-                history.push({
-                    pathname: '/',
-                    search: `?fl=${from}&tl=${to}&text=${this.state.originText}`
-                });
-                if (this.state.translatedText) {
-                    this.translateText(this.state.translatedText.text[0], from, to);
-                } 
+                        detectedLang: '',
+                    });
+                    if (this.state.translateData.to.text) {
+                        this.translateText(this.state.translateData.to.text, from, to);
+                    }
+                }
                 break;
+                
             default:
                 break;
         }
+        history.push({
+            pathname: '/',
+            search: `?fl=${from || code}&tl=${to || this.state.translateData.to.codeLang}&text=${this.state.translateData.from.text}`,
+            // state: {translateHistory: this.state.translateHistory}
+        });
     }
-    setOriginLangCode = (code, type) => {
+
+    setOriginLangCode = (code, type='from') => {
         this.setState({
-            fromCodeLang: code,
             visible: false
         });
-        this.setNoSameKey(type, code);
-        if (!code && this.state.originText) {
-            this.detectLanguage(this.state.originText);
-        }
-        if (code) {
-            this.state.languages.from[0].name = 'Определить язык'; // pardon
-            this.setState({detectedLang: ''})
+
+        this.setLangTitle(code, this.state.langsList.langs[code], type);
+        if (!code && this.state.translateData.from.text) {
+            this.detectLanguage(this.state.translateData.from.text);
         }
     }
-    setFinalLangCode = (code, type) => {
+
+    setFinalLangCode = (code, type='to') => {
         this.setState({
-            toCodeLang: code,
             visible: false
         });
-        this.setNoSameKey(type, code);
-        if (this.state.originText) {
-            this.translateText(this.state.originText, this.state.fromCodeLang, code);
+
+        this.setLangTitle(code, this.state.langsList.langs[code], type);
+        if (this.state.translateData.from.text) {
+            this.translateText(
+                this.state.translateData.from.text, 
+                this.state.translateData.from.codeLang, 
+                code
+            );
         }
     }
-    setNoSameKey = (type, code) => {
-        if (this.checkForSameKeys(type, code) === 0) {
-            this.setLangTitle(code, this.state.langsList.langs[code], type);
-        }
-    }
+
     checkForSameKeys = (type, code) => {
         let count = 0;
         if (type) {
-            this.state.languages[type].filter((lang) => (lang.code === code ? count++ : count ));
+            this.state.translateData[type].languages.filter((lang) => (lang.code === code ? count++ : count ));
         }
         return count;
     }
+
     checkValue = (value) => {
-        this.setState({originText: value});
-        this.state.fromCodeLang ? this.translateText(value) : this.detectLanguage(value);
+        this.setState({
+            translateData: {
+                ...this.state.translateData,
+                'from': {
+                    ...this.state.translateData.from,
+                    text: value
+                }
+            }
+        });
+
+        this.state.translateData.from.codeLang ? 
+        this.translateText(value) : 
+        this.detectLanguage(value);
     };
 
     enterForTranslate = (e) => {
@@ -282,6 +314,7 @@ export class Body extends Component {
             this.translateText(e.target.value);
         }
     }
+
     detectLanguage = debounce((text) => {
         if (text) {
             fetch(`https://translate.yandex.net/api/v1.5/tr.json/detect?key=${this.state.apiKey}&text=${text}`)
@@ -291,49 +324,121 @@ export class Body extends Component {
                     this.setState({
                         detectedLang : detectedLang.lang
                     });
-                    this.setLangTitle('', this.state.langsList.langs[detectedLang.lang], 'detect');
-                    this.translateText(text, detectedLang.lang, this.state.toCodeLang);
+                    this.setLangTitle(
+                        this.state.translateData.from.codeLang, 
+                        this.state.langsList.langs[detectedLang.lang], 
+                        'detect'
+                    );
+                    this.translateText(
+                        text, 
+                        this.state.translateData.from.codeLang, 
+                        this.state.translateData.to.codeLang
+                    );
                 }
-                
             }); 
-            
+        } else {
+            this.setState({
+                translateData: {
+                    ...this.state.translateData,
+                    'to': {
+                        ...this.state.translateData.to,
+                        text: ''
+                    }
+                },
+            });
         }
     }, 500)
+
     translateText = debounce((text, from, to, historyData) => {
-        const date = new Date();
         if (text) {
-            fetch(`https://translate.yandex.net/api/v1.5/tr.json/translate?key=${this.state.apiKey}&text=${text}&lang=${from || this.state.fromCodeLang || this.state.detectedLang}-${to || this.state.toCodeLang}`)
+            fetch(`https://translate.yandex.net/api/v1.5/tr.json/translate?key=${this.state.apiKey}&text=${text}&lang=${from || this.state.translateData.from.codeLang || this.state.detectedLang}-${to || this.state.translateData.to.codeLang}`)
             .then((res) => res.json())
             .then((translatedText) => this.setState({
-                translatedText,
-                translateHistory: historyData ? historyData : [
-                    {
-                        key: date.getTime(),
-                        from: from || this.state.fromCodeLang, 
-                        to: to || this.state.toCodeLang, 
-                        text,
-                        finalText: translatedText.text[0]
+                translateData: {
+                    'from': {
+                        ...this.state.translateData.from,
+                        codeLang: from || this.state.translateData.from.codeLang, 
+                        text
                     },
-                    ...this.state.translateHistory
-                ]
+                    'to': {
+                        ...this.state.translateData.to,
+                        codeLang: to || this.state.translateData.to.codeLang,
+                        text: translatedText.text[0]
+                    }
+                },
+                translateHistory: this.setHistory(
+                    text,
+                    from || this.state.translateData.from.codeLang,
+                    to || this.state.translateData.to.codeLang,
+                    translatedText.text[0],
+                    historyData
+                )
             }))
             .catch((res) => console.log('status: ', res.status));
         } else {
-            this.setState({translatedText: ''});
+            this.setState({
+                translateData: {
+                    ...this.state.translateData,
+                    'to': {
+                        ...this.state.translateData.to,
+                        text: ''
+                    }
+                },
+            });
         }
         history.push({
             pathname: '/',
-            search: `?fl=${from || this.state.fromCodeLang || this.state.detectedLang}&tl=${to || this.state.toCodeLang}&text=${text}`
+            search: `?fl=${from || this.state.translateData.from.codeLang || this.state.detectedLang}&tl=${to || this.state.translateData.to.codeLang}&text=${this.state.translateData.from.text}`,
+            // state: {translateHistory: this.state.translateHistory}
         });
-    }, 500)
+    }, 500);
+
+    setHistory = (originText, from, to, finalText, historyData) => {
+        let count = 0;
+        let newHistoryData = this.state.translateHistory;
+
+        this.state.translateHistory.filter(({text}) => (
+            text === originText ? count++ : count 
+        ));
+        if (count) {
+            newHistoryData = [
+                ...this.state.translateHistory.filter(({text}) => (text === originText)),
+                ...this.state.translateHistory.filter(({text}) => (text !== originText)),
+            ]
+        }
+        if (!count && !historyData) { // временно, пока historyData не хранит все данные до перезагрузки
+            const date = new Date();
+            newHistoryData = [
+                {
+                    key: date.getTime(),
+                    from, 
+                    to, 
+                    text: originText,
+                    finalText
+                },
+                ...this.state.translateHistory 
+            ]
+        }
+        return historyData || newHistoryData;
+    }
+
     displayHistory = (visibleHistory) => {
         this.setState({visibleHistory});
     }
+
     backHistoryEntry = (fromCodeLang, toCodeLang, originText) => {
         this.setState({
-            fromCodeLang,
-            toCodeLang,
-            originText
+            translateData: {
+                'from': {
+                    ...this.state.translateData.from,
+                    codeLang: fromCodeLang,
+                    text: originText
+                },
+                'to': {
+                    ...this.state.translateData.to,
+                    codeLang: toCodeLang
+                }
+            }
         });
         this.translateText(
             originText, 
@@ -342,29 +447,42 @@ export class Body extends Component {
             this.state.translateHistory
         );
     }
+
     componentWillMount() {
         this.translateText.cancel() 
         || this.detectLanguage.cancel();
     }
+
     componentDidMount = () => {
         const params = new URLSearchParams(location.search);
+
         this.setState({
-            fromCodeLang: params.get('fl') ? params.get('fl') : 'ru',
-            toCodeLang: params.get('tl') ? params.get('tl') : 'en',
-            originText: params.get('text') ? params.get('text') : ''
+            translateData: {
+                'from': {
+                    ...this.state.translateData.from,
+                    codeLang: params.get('fl') ? params.get('fl') : 'ru',
+                    text: params.get('text') ? params.get('text') : ''
+                },
+                'to': {
+                    ...this.state.translateData.to,
+                    codeLang: params.get('tl') ? params.get('tl') : 'en'
+                }
+            }
         });
         fetch(`https://translate.yandex.net/api/v1.5/tr.json/getLangs?key=${this.state.apiKey}&ui=ru`)
         .then((res) => res.json())
         .then((langsList) => {
             this.setState({langsList});
-            if (this.state.originText) {
+
+            if (this.state.translateData.from.text) {
                 this.translateText(params.get('text'), params.get('fl'), params.get('tl'));
             } 
         })
         .catch((res) => console.log('status: ', res.status));
     }
+
     render() {
-        const { fromCodeLang, toCodeLang, detectedLang, languages, visible, langsList, timePassed, callbackData, translatedText, originText,visibleHistory, translateHistory } = this.state;
+        const { translateData, detectedLang, visible, langsList, callbackData, visibleHistory, translateHistory } = this.state;
 
         return (
             <Router history={history}>
@@ -377,12 +495,9 @@ export class Body extends Component {
                         <div className="layer2"></div>
                         <div className="layer3">
                             <Header 
-                                languages={languages}
+                                translateData={translateData}
                                 displayList={this.displayList}
-                                fromCodeLang={fromCodeLang}
-                                toCodeLang={toCodeLang}
                                 detectedLang={detectedLang}
-                                timePassed={timePassed}
                                 detectLanguage={this.detectLanguage}
                                 setLangTitle={this.setLangTitle}
                                 setOriginLangCode={this.setOriginLangCode}
@@ -400,12 +515,12 @@ export class Body extends Component {
                                 <Textarea
                                     key="0"
                                     onChange={this.checkValue}
-                                    value={originText ? originText : ''}
+                                    value={translateData.from.text|| ''}
                                     enterForTranslate={this.enterForTranslate}
                                 />
                                 <Textarea
                                     key="1"
-                                    value={translatedText ? translatedText.text[0] : ''}
+                                    value={translateData.to.text || ''}
                                     disabled={true}
                                 />
                             </div>

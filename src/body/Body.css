@@ -2,7 +2,7 @@
     background-color: #ffffff;
     min-height: 100vh;
     width: 100%;
-    position: fixed;
+    /* position: fixed; */
 }
 .title {
     margin: 15px 50px;
@@ -23,19 +23,18 @@
     flex-flow: row wrap;
     align-items: center;
     max-width: 1280px;
-    max-height: 400px;
+    /* max-height: 400px; */
     margin: 0 auto;
     position: relative;
     width: 100%;
     top: -90px;
-            border-radius: 8px;
+    border-radius: 8px;
     background: #ffffff;
     border: 1px solid #d4d4d4;
-            box-shadow: 0 1px 4px 0 rgba(0,0,0,0.37);
-            min-height: 220px;
-            overflow: auto;
-            z-index: 5;
-            cursor: default;
+    box-shadow: 0 1px 4px 0 rgba(0,0,0,0.37);
+    /* min-height: 220px; */
+    z-index: 5;
+    cursor: default;
 }
 .layer4 {
     display: none;
@@ -59,7 +58,7 @@
     flex-wrap: nowrap;
     height: 100%;
     flex-grow: 1;
-    margin-top: 50px;
+    /* margin-top: 50px; */
 }
 .hideContent {
     display: none;

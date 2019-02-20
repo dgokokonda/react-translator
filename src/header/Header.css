@@ -6,7 +6,7 @@
     flex-wrap: nowrap;
     border-bottom: 1px solid #d4d4d4;
     top: 130px;
-    position: fixed;
+    /* position: fixed; */
     background: #ffffff;
     z-index: 3;
 }
